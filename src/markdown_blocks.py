@@ -1,3 +1,5 @@
+import re
+
 from enum import Enum
 
 class Blocktype(Enum):
@@ -19,4 +21,25 @@ def markdown_to_blocks(markdown):
     return filtered_blocks
 
 def block_to_block_type(block):
-    pass
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return Blocktype.HEADING
+    elif block.startswith('```') and block.endswith('```'):
+        return Blocktype.CODE
+    elif block.startswith('>'):
+        for line in block.split('\n'):
+            if not line.startswith('>'):
+                return Blocktype.PARAGRAPH
+        return Blocktype.QUOTE
+    elif block.startswith('- '):
+        for line in block.split('\n'):
+            if not line.startswith('- '):
+                return Blocktype.PARAGRAPH
+        return Blocktype.ULIST
+    elif block.startswith("1. "):
+        block_spl = block.split('\n')
+        for i in range(len(block_spl)):
+            if not block_spl[i].startswith(f"{i + 1}. "):
+                return Blocktype.PARAGRAPH
+        return Blocktype.OLIST
+    else:
+        return Blocktype.PARAGRAPH
